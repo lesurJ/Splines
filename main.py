@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import cycler
 import numpy as np
 from splines import Bezier, CatmullRom, B_spline
 
@@ -13,6 +14,8 @@ def generate_points(n=10):
 
 def plot(control_points, splines, names):
     _, ax = plt.subplots()
+    colors = cycler.cycler("color", plt.cm.viridis(np.linspace(0, 1, len(splines))))
+    ax.set_prop_cycle(colors)
     ax.plot(
         control_points[:, 0],
         control_points[:, 1],
