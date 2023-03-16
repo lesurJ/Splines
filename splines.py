@@ -29,7 +29,7 @@ class Spline(object):
         out = np.zeros(shape=(0, control_points.shape[1]))
         for _ in range(nb_sub_spline):
             points = t_vector @ self.characteristic_matrix @ control_points[:4]
-            out = np.vstack((out, points))
+            out = np.vstack((out, points[:-1, :]))
             control_points = np.roll(control_points, shift=shift, axis=0)
         return out
 
