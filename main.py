@@ -19,7 +19,7 @@ def plot(control_points, splines, names):
         c="k",
         marker=".",
         linestyle="dashed",
-        label="reference points",
+        label="control points",
     )
     for s, n in zip(splines, names):
         ax.plot(s[:, 0], s[:, 1], label=n)
