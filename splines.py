@@ -2,8 +2,7 @@ import numpy as np
 
 
 class Spline(object):
-    def __init__(self, characteristic_matrix, dimension=2):
-        self.dim = dimension
+    def __init__(self, characteristic_matrix):
         self.characteristic_matrix = characteristic_matrix
 
     def get_name(self):
@@ -27,7 +26,7 @@ class Spline(object):
         )
         shift = -3 if self.type == "shifting" else -1
 
-        out = np.zeros(shape=(0, self.dim))
+        out = np.zeros(shape=(0, control_points.shape[1]))
         for _ in range(nb_sub_spline):
             points = t_vector @ self.characteristic_matrix @ control_points[:4]
             out = np.vstack((out, points))
