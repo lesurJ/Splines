@@ -19,6 +19,15 @@ class Spline(object):
             )
         ).T
 
+        t_vector_diff = np.vstack(
+            (
+                np.zeros(number_of_interpolated_points),
+                np.power(lin_sp, 0),
+                2 * np.power(lin_sp, 1),
+                3 * np.power(lin_sp, 2),
+            )
+        ).T
+
         nb_sub_spline = (
             len(control_points) // 3
             if self.type == "shifting"
@@ -26,12 +35,16 @@ class Spline(object):
         )
         shift = -3 if self.type == "shifting" else -1
 
-        out = np.zeros(shape=(0, control_points.shape[1]))
+        spline_points = np.zeros(shape=(0, control_points.shape[1]))
+        spline_tangent_points = np.zeros(shape=(0, control_points.shape[1]))
         for _ in range(nb_sub_spline):
             points = t_vector @ self.characteristic_matrix @ control_points[:4]
-            out = np.vstack((out, points[:-1, :]))
+            spline_points = np.vstack((spline_points, points[:-1, :]))
+            points = t_vector_diff @ self.characteristic_matrix @ control_points[:4]
+            spline_tangent_points = np.vstack((spline_tangent_points, points[:-1, :]))
+
             control_points = np.roll(control_points, shift=shift, axis=0)
-        return out
+        return spline_points, spline_tangent_points
 
 
 class Bezier(Spline):

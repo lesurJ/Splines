@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-import cycler
 import numpy as np
 from splines import Bezier, CatmullRom, B, Cardinal
 
@@ -13,25 +12,38 @@ def generate_points(n=10):
 
 
 def plot(control_points, splines, names):
-    _, ax = plt.subplots()
-    colors = cycler.cycler("color", plt.cm.viridis(np.linspace(0, 1, len(splines))))
-    ax.set_prop_cycle(colors)
-    ax.plot(
-        control_points[:, 0],
-        control_points[:, 1],
-        c="k",
-        marker=".",
-        linestyle="dashed",
-        label="control points",
-    )
-    for s, n in zip(splines, names):
-        ax.plot(s[:, 0], s[:, 1], label=n)
+    number_of_splines = len(splines)
+    fig, ax = plt.subplots(1, number_of_splines)
+    fig.suptitle("Comparison between the different implemented splines.")
 
-    ax.legend()
-    ax.grid()
-    ax.set_xlim(-1.25, 1.25)
-    ax.set_ylim(-1.25, 1.25)
-    ax.set_aspect("equal", "box")
+    for ids, (s, tangents) in enumerate(splines):
+        ax[ids].plot(
+            control_points[:, 0],
+            control_points[:, 1],
+            c="k",
+            marker=".",
+            linestyle="dashed",
+            label="control points",
+        )
+
+        ax[ids].plot(s[:, 0], s[:, 1], c="r")
+        alpha = 0.5
+        for i in range(0, s.shape[0], 5):
+            ax[ids].arrow(
+                s[i, 0],
+                s[i, 1],
+                alpha * tangents[i, 0],
+                alpha * tangents[i, 1],
+                length_includes_head=True,
+                head_width=0.01,
+                color="b",
+            )
+
+        ax[ids].set_title(names[ids])
+        ax[ids].grid()
+        ax[ids].set_xlim(-1.25, 1.25)
+        ax[ids].set_ylim(-1.25, 1.25)
+        ax[ids].set_aspect("equal", "box")
     plt.show()
 
 
