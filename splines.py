@@ -52,10 +52,24 @@ class CatmullRom(Spline):
         self.type = "sliding"
 
 
-class B_spline(Spline):
+class B(Spline):
     def __init__(self):
         characteristic_matrix = (1 / 6) * np.array(
             [[1, 4, 1, 0], [-3, 0, 3, 0], [3, -6, 3, 0], [-1, 3, -3, 1]]
+        )
+        super().__init__(characteristic_matrix)
+        self.type = "sliding"
+
+
+class Cardinal(Spline):
+    def __init__(self, s=0.25):
+        characteristic_matrix = np.array(
+            [
+                [0, 1, 0, 0],
+                [-s, 0, s, 0],
+                [2 * s, s - 3, 3 - 2 * s, -s],
+                [-s, 2 - s, s - 2, s],
+            ]
         )
         super().__init__(characteristic_matrix)
         self.type = "sliding"

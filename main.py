@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import cycler
 import numpy as np
-from splines import Bezier, CatmullRom, B_spline
+from splines import Bezier, CatmullRom, B, Cardinal
 
 
 def generate_points(n=10):
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     splines = []
     names = []
 
-    for s in [Bezier(), CatmullRom(), B_spline()]:
+    for s in [Bezier(), CatmullRom(), B(), Cardinal()]:
         names.append(s.get_name())
         splines.append(s.get_spline(control_points, 50))
 
