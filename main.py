@@ -3,18 +3,19 @@ import numpy as np
 from splines import Bezier, CatmullRom, B, Cardinal
 
 
-def generate_points(n=10):
-    angles = np.sort(np.random.uniform(0, 2 * np.pi, n))
-    r = np.random.uniform(0.7, 1, n)
+def generate_points(n=13):
+    angles = np.sort(np.random.uniform(0, 1.9 * np.pi, n))
+    angles = np.linspace(0, 2 * np.pi, n)
+    r = np.random.uniform(0.5, 1, n)
     X = r * np.cos(angles)
     Y = r * np.sin(angles)
     return np.vstack((X, Y)).T
 
 
-def plot(control_points, splines, names):
+def plot(control_points, splines, names, with_tangents=False):
     number_of_splines = len(splines)
     fig, ax = plt.subplots(1, number_of_splines)
-    fig.suptitle("Comparison between the different implemented splines.")
+    fig.suptitle("Comparison between the implemented splines.")
 
     for ids, (s, tangents) in enumerate(splines):
         ax[ids].plot(
@@ -26,18 +27,22 @@ def plot(control_points, splines, names):
             label="control points",
         )
 
-        ax[ids].plot(s[:, 0], s[:, 1], c="r")
-        alpha = 0.5
-        for i in range(0, s.shape[0], 5):
-            ax[ids].arrow(
-                s[i, 0],
-                s[i, 1],
-                alpha * tangents[i, 0],
-                alpha * tangents[i, 1],
-                length_includes_head=True,
-                head_width=0.01,
-                color="b",
-            )
+        if s.shape[0] == 1:
+            ax[ids].scatter(s[:, 0], s[:, 1], c="r", marker=".")
+        else:
+            ax[ids].plot(s[:, 0], s[:, 1], c="r")
+        if with_tangents:
+            alpha = 0.5
+            for i in range(0, s.shape[0]):
+                ax[ids].arrow(
+                    s[i, 0],
+                    s[i, 1],
+                    alpha * tangents[i, 0],
+                    alpha * tangents[i, 1],
+                    length_includes_head=True,
+                    head_width=0.01,
+                    color="b",
+                )
 
         ax[ids].set_title(names[ids])
         ax[ids].grid()
@@ -53,8 +58,9 @@ if __name__ == "__main__":
     splines = []
     names = []
 
+    u = np.linspace(0, 1, 31)
     for s in [Bezier(), CatmullRom(), B(), Cardinal()]:
         names.append(s.get_name())
-        splines.append(s.get_spline(control_points, 50))
+        splines.append(s.get_spline(control_points, u))
 
     plot(control_points, splines, names)

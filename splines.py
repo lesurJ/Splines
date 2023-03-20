@@ -8,47 +8,67 @@ class Spline(object):
     def get_name(self):
         return self.__class__.__name__
 
-    def get_spline(self, control_points, number_of_interpolated_points):
-        lin_sp = np.linspace(0, 1, number_of_interpolated_points)
+    def get_spline(self, control_points, u):
+        nb_segments = (
+            int((control_points.shape[0] - 1) // 3)
+            if self.type == "shifting"
+            else control_points.shape[0] - 3
+        )
+
+        if np.isscalar(u):
+            u = np.array([u])
+
+        # segmentID is the integer part => will decide which segment (i.e. set of 4 control points) to use
+        # t is the decimal part  => will serve to mix the 4 control points of the segment (t in [0,1])
+        t, segmentIDs = np.modf(u * nb_segments)
+        segmentIDs = segmentIDs.astype(np.int)
+        t[np.where(segmentIDs == nb_segments)] = 1
+        segmentIDs[np.where(segmentIDs == nb_segments)] = nb_segments - 1
+
         t_vector = np.vstack(
             (
-                np.power(lin_sp, 0),
-                np.power(lin_sp, 1),
-                np.power(lin_sp, 2),
-                np.power(lin_sp, 3),
+                np.power(t, 0),
+                np.power(t, 1),
+                np.power(t, 2),
+                np.power(t, 3),
             )
         ).T
 
         t_vector_diff = np.vstack(
             (
-                np.zeros(number_of_interpolated_points),
-                np.power(lin_sp, 0),
-                2 * np.power(lin_sp, 1),
-                3 * np.power(lin_sp, 2),
+                np.zeros(t.shape[0]),
+                np.power(t, 0),
+                2 * np.power(t, 1),
+                3 * np.power(t, 2),
             )
         ).T
 
-        nb_sub_spline = (
-            len(control_points) // 3
-            if self.type == "shifting"
-            else len(control_points) - 3
-        )
-        shift = -3 if self.type == "shifting" else -1
-
         spline_points = np.zeros(shape=(0, control_points.shape[1]))
-        spline_tangent_points = np.zeros(shape=(0, control_points.shape[1]))
-        for _ in range(nb_sub_spline):
-            points = t_vector @ self.characteristic_matrix @ control_points[:4]
-            spline_points = np.vstack((spline_points, points[:-1, :]))
-            points = t_vector_diff @ self.characteristic_matrix @ control_points[:4]
-            spline_tangent_points = np.vstack((spline_tangent_points, points[:-1, :]))
-            control_points = np.roll(control_points, shift=shift, axis=0)
+        spline_tangents = np.zeros(shape=(0, control_points.shape[1]))
 
-        spline_points = np.vstack((spline_points, spline_points[-1, :]))
-        spline_tangent_points = np.vstack(
-            (spline_tangent_points, spline_tangent_points[-1, :])
+        uniqueIDs, uniqueIndices, counts = np.unique(
+            segmentIDs, return_index=True, return_counts=True
         )
-        return spline_points, spline_tangent_points
+        for unique, index, count in zip(uniqueIDs, uniqueIndices, counts):
+            points = (
+                t_vector[index : index + count, :]
+                @ self.characteristic_matrix
+                @ self.get_set_of_control_points(control_points, unique)
+            )
+            spline_points = np.vstack((spline_points, points))
+            points = (
+                t_vector_diff[index : index + count, :]
+                @ self.characteristic_matrix
+                @ self.get_set_of_control_points(control_points, unique)
+            )
+            spline_tangents = np.vstack((spline_tangents, points))
+        return spline_points, spline_tangents
+
+    def get_set_of_control_points(self, control_points, id):
+        if self.type == "shifting":
+            return control_points[3 * id : 3 * id + 4]
+        elif self.type == "sliding":
+            return control_points[id : id + 4]
 
 
 class Bezier(Spline):
