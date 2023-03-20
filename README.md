@@ -11,19 +11,19 @@ I started playing with splines while developping robotics application as I often
 This implementation is quite minimalist and uses the following matrix form for all type of splines.
 
 $$
-\bm{P(t)} =
+\mathbf{P(t)} =
 \begin{bmatrix}
     1 & t & t^2 & t^3
 \end{bmatrix}
-\bm{A}
-\bm{P}
+\mathbf{A}
+\mathbf{P}
 $$
 
 where
 - $t$ is the mixing parameter $\in [0,1]$
-- $\bm{A} \in \mathbb{R}^{4 \times 4}$ is the weight matrix, also called the characteristic matrix.
-- $\bm{P} \in \mathbb{R}^{4 \times n}$ is the control points matrix, with each row containing a control point of dimension n.
-- $\bm{P(t)} \in \mathbb{R}^{1 \times n}$ is the resulting point.
+- $\mathbf{A} \in \mathbb{R}^{4 \times 4}$ is the weight matrix, also called the characteristic matrix.
+- $\mathbf{P} \in \mathbb{R}^{4 \times n}$ is the control points matrix, with each row containing a control point of dimension n.
+- $\mathbf{P(t)} \in \mathbb{R}^{1 \times n}$ is the resulting point.
 
 
 ## Getting Started
