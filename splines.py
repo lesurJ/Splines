@@ -42,8 +42,12 @@ class Spline(object):
             spline_points = np.vstack((spline_points, points[:-1, :]))
             points = t_vector_diff @ self.characteristic_matrix @ control_points[:4]
             spline_tangent_points = np.vstack((spline_tangent_points, points[:-1, :]))
-
             control_points = np.roll(control_points, shift=shift, axis=0)
+
+        spline_points = np.vstack((spline_points, spline_points[-1, :]))
+        spline_tangent_points = np.vstack(
+            (spline_tangent_points, spline_tangent_points[-1, :])
+        )
         return spline_points, spline_tangent_points
 
 
