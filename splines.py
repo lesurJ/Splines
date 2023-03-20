@@ -80,15 +80,6 @@ class Bezier(Spline):
         self.type = "shifting"
 
 
-class CatmullRom(Spline):
-    def __init__(self):
-        characteristic_matrix = 0.5 * np.array(
-            [[0, 2, 0, 0], [-1, 0, 1, 0], [2, -5, 4, -1], [-1, 3, -3, 1]]
-        )
-        super().__init__(characteristic_matrix)
-        self.type = "sliding"
-
-
 class B(Spline):
     def __init__(self):
         characteristic_matrix = (1 / 6) * np.array(
@@ -110,3 +101,8 @@ class Cardinal(Spline):
         )
         super().__init__(characteristic_matrix)
         self.type = "sliding"
+
+
+class CatmullRom(Cardinal):
+    def __init__(self):
+        super().__init__(s=0.5)
