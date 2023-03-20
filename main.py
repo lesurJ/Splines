@@ -4,8 +4,7 @@ from splines import Bezier, CatmullRom, B, Cardinal
 
 
 def generate_points(n=13):
-    angles = np.sort(np.random.uniform(0, 1.9 * np.pi, n))
-    angles = np.linspace(0, 2 * np.pi, n)
+    angles = np.sort(np.random.uniform(0, 2 * np.pi, n))
     r = np.random.uniform(0.5, 1, n)
     X = r * np.cos(angles)
     Y = r * np.sin(angles)
@@ -28,9 +27,9 @@ def plot(control_points, splines, names, with_tangents=False):
         )
 
         if s.shape[0] == 1:
-            ax[ids].scatter(s[:, 0], s[:, 1], c="r", marker=".")
+            ax[ids].scatter(s[:, 0], s[:, 1], c="r", marker=".", label="spline")
         else:
-            ax[ids].plot(s[:, 0], s[:, 1], c="r")
+            ax[ids].plot(s[:, 0], s[:, 1], c="r", label="spline")
         if with_tangents:
             alpha = 0.5
             for i in range(0, s.shape[0]):
@@ -46,8 +45,9 @@ def plot(control_points, splines, names, with_tangents=False):
 
         ax[ids].set_title(names[ids])
         ax[ids].grid()
-        ax[ids].set_xlim(-1.25, 1.25)
-        ax[ids].set_ylim(-1.25, 1.25)
+        ax[ids].legend()
+        ax[ids].set_xlim(-1.1, 1.1)
+        ax[ids].set_ylim(-1.1, 1.1)
         ax[ids].set_aspect("equal", "box")
     plt.show()
 
