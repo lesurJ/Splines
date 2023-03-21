@@ -17,6 +17,11 @@ def plot(control_points, splines, names, with_tangents=False):
     fig.suptitle("Comparison between the implemented splines.")
 
     for ids, (s, tangents) in enumerate(splines):
+        if s.shape[0] == 1:
+            ax[ids].scatter(s[0, 0], s[0, 1], c="r", marker="x", label="spline")
+        else:
+            ax[ids].plot(s[:, 0], s[:, 1], c="r", label="spline")
+
         ax[ids].plot(
             control_points[:, 0],
             control_points[:, 1],
@@ -26,10 +31,6 @@ def plot(control_points, splines, names, with_tangents=False):
             label="control points",
         )
 
-        if s.shape[0] == 1:
-            ax[ids].scatter(s[:, 0], s[:, 1], c="r", marker=".", label="spline")
-        else:
-            ax[ids].plot(s[:, 0], s[:, 1], c="r", label="spline")
         if with_tangents:
             alpha = 0.5
             for i in range(0, s.shape[0]):

@@ -46,6 +46,25 @@ python3 -m pip install numpy matplotlib
    python3 main.py
    ```
 
+3. Or use your own control points
+    ```python
+    import numpy as np
+
+    if __name__=="__main__":
+        # 1. Generate your own control points in dimension 2
+        control_points = np.arange(26).reshape(-1,2)
+
+        # 2. Define the spline to use
+        spline = Bezier()
+
+        # 3. Pick a single or multiple values for the mixing parameter
+        u = 0.25
+        u = np.linspace(0,1,100)
+
+        # 4. Get the spline value as well as the tangents
+        spline_points, spline_tangents = spline.get_spline(control_points, u)
+    ```
+
 
 ### Remarks
 
