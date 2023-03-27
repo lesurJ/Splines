@@ -2,7 +2,7 @@
 
 A simple repository to construct some famous splines such as Catmull-Rom, B-spline, Cardinal etc.
 
-![Alt text](splines.png)
+![image1](images/splines.png)
 
 ## Introduction
 
@@ -49,6 +49,7 @@ python3 -m pip install numpy matplotlib
 3. Or use your own control points
     ```python
     import numpy as np
+    from splines import Bezier, CatmullRom, B, Cardinal
 
     if __name__=="__main__":
         # 1. Generate your own control points in dimension 2
@@ -56,10 +57,16 @@ python3 -m pip install numpy matplotlib
 
         # 2. Define the spline to use
         spline = Bezier()
+        # spline = CatmullRom()
+        # spline = B()
+        # spline = Cardinal()
 
         # 3. Pick a single or multiple values for the mixing parameter
         u = 0.25
         u = np.linspace(0,1,100)
+
+        # (OPTIONAL) : use arc-length reparameterization
+        u = spline.reparameterize_mixing_parameter(control_points, u)
 
         # 4. Get the spline value as well as the tangents
         spline_points, spline_tangents = spline.get_spline(control_points, u)
@@ -68,12 +75,22 @@ python3 -m pip install numpy matplotlib
 
 ### Remarks
 
-The control points used in the main script are generated without any constraints on tangency and derivative continuity. The user should handle the constraints in the generation of the control points.
+The control points (CP) used in the main script are generated without any constraints on tangency and derivative continuity. The user should handle the constraints in the generation of the CP.
 
-**Bézier** : The Bézier spline is a concatenation of cubic Bézier curves containing each 4 control points. In order to be smooth, some conditions needs to be met at the junctions (e.g the control points before and after the junction are symmetric).
+**Bézier** : The Bézier spline is a concatenation of cubic Bézier curves containing each 4 CP. In order to be smooth, some conditions needs to be met at the junctions (e.g the CP before and after the junction are symmetric). This implementation assumes there are no duplicates in the CP; meaning the first cubic bézier has CP #0 to #3 included, the next one as CP #3 to #6 included etc.
 
 **Catmull-Rom** : The Catmull-Rom is a special case of the cardinal spline with the scaling value set at $0.5$.
 
+**Reparameterization** : The reparameterization of the mixing parameter is available in the method ```reparameterize_mixing_parameter()```.
+
+As explained [here](https://davis.wpi.edu/~matt/courses/biomed/reparam.htm), *a problem that exists with splines is that when given a linearly increasing t, the point does not progress through the curve at even intervals. To correct this problem we reparameterized the spline by sampling points and then linearly interpolating between those sample points.*
+
+This behavior can be seen in the plot below.
+![image2](images/d=f(t).png)
+
+A comparison between a spline with an uniform input parameter and a reparameterized one is shown below.
+
+![image3](images/reparameterization.png)
 
 ## License
 

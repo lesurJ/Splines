@@ -70,6 +70,16 @@ class Spline(object):
         elif self.type == "sliding":
             return control_points[id : id + 4]
 
+    def reparameterize_mixing_parameter(self, control_points, u):
+        f = 100 # the more points the better
+        u_resampled = np.linspace(0, 1, f*len(u))
+        spline_points, _ = self.get_spline(control_points, u_resampled)
+
+        norms = np.linalg.norm(np.diff(spline_points, axis=0), axis=1)
+        cumsum = np.concatenate(([0], np.cumsum(norms)))
+        cumsum /= cumsum[-1]
+
+        return np.interp(u, cumsum, u_resampled)
 
 class Bezier(Spline):
     def __init__(self):

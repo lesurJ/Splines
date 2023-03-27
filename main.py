@@ -12,17 +12,17 @@ def generate_points(n=13):
 
 
 def plot(control_points, splines, names, with_tangents=False):
-    number_of_splines = len(splines)
-    fig, ax = plt.subplots(1, number_of_splines)
+    fig, ax = plt.subplots(2, 2, figsize=(10,10))
     fig.suptitle("Comparison between the implemented splines.")
 
     for ids, (s, tangents) in enumerate(splines):
+        id1, id2 = np.divmod(ids, 2)
         if s.shape[0] == 1:
-            ax[ids].scatter(s[0, 0], s[0, 1], c="r", marker="x", label="spline")
+            ax[id1][id2].scatter(s[0, 0], s[0, 1], c="r", marker="x", label="spline")
         else:
-            ax[ids].plot(s[:, 0], s[:, 1], c="r", label="spline")
+            ax[id1][id2].plot(s[:, 0], s[:, 1], c="r", marker="x", label="spline")
 
-        ax[ids].plot(
+        ax[id1][id2].plot(
             control_points[:, 0],
             control_points[:, 1],
             c="k",
@@ -34,7 +34,7 @@ def plot(control_points, splines, names, with_tangents=False):
         if with_tangents:
             alpha = 0.5
             for i in range(0, s.shape[0]):
-                ax[ids].arrow(
+                ax[id1][id2].arrow(
                     s[i, 0],
                     s[i, 1],
                     alpha * tangents[i, 0],
@@ -44,12 +44,12 @@ def plot(control_points, splines, names, with_tangents=False):
                     color="b",
                 )
 
-        ax[ids].set_title(names[ids])
-        ax[ids].grid()
-        ax[ids].legend()
-        ax[ids].set_xlim(-1.1, 1.1)
-        ax[ids].set_ylim(-1.1, 1.1)
-        ax[ids].set_aspect("equal", "box")
+        ax[id1][id2].set_title(names[ids])
+        ax[id1][id2].grid()
+        ax[id1][id2].legend()
+        ax[id1][id2].set_xlim(-1.1, 1.1)
+        ax[id1][id2].set_ylim(-1.1, 1.1)
+        ax[id1][id2].set_aspect("equal", "box")
     plt.show()
 
 
@@ -62,6 +62,7 @@ if __name__ == "__main__":
     u = np.linspace(0, 1, 31)
     for s in [Bezier(), CatmullRom(), B(), Cardinal()]:
         names.append(s.get_name())
-        splines.append(s.get_spline(control_points, u))
+        u_reparameterized = s.reparameterize_mixing_parameter(control_points, u)
+        splines.append(s.get_spline(control_points, u_reparameterized))
 
     plot(control_points, splines, names)
