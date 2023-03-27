@@ -12,7 +12,7 @@ def generate_points(n=13):
 
 
 def plot(control_points, splines, names, with_tangents=False):
-    fig, ax = plt.subplots(2, 2, figsize=(10,10))
+    fig, ax = plt.subplots(2, 2, figsize=(10, 10))
     fig.suptitle("Comparison between the implemented splines.")
 
     for ids, (s, tangents) in enumerate(splines):
@@ -62,7 +62,6 @@ if __name__ == "__main__":
     u = np.linspace(0, 1, 31)
     for s in [Bezier(), CatmullRom(), B(), Cardinal()]:
         names.append(s.get_name())
-        u_reparameterized = s.reparameterize_mixing_parameter(control_points, u)
-        splines.append(s.get_spline(control_points, u_reparameterized))
+        splines.append(s.get_spline(control_points, u))
 
     plot(control_points, splines, names)

@@ -65,9 +65,6 @@ python3 -m pip install numpy matplotlib
         u = 0.25
         u = np.linspace(0,1,100)
 
-        # (OPTIONAL) : use arc-length reparameterization
-        u = spline.reparameterize_mixing_parameter(control_points, u)
-
         # 4. Get the spline value as well as the tangents
         spline_points, spline_tangents = spline.get_spline(control_points, u)
     ```
@@ -81,7 +78,7 @@ The control points (CP) used in the main script are generated without any constr
 
 **Catmull-Rom** : The Catmull-Rom is a special case of the cardinal spline with the scaling value set at $0.5$.
 
-**Reparameterization** : The reparameterization of the mixing parameter is available in the method ```reparameterize_mixing_parameter()```.
+**Reparameterization** : The reparameterization of the mixing parameter is implemented in the method ```reparameterize_mixing_parameter()```. Note that this feature is activated by default.
 
 As explained [here](https://davis.wpi.edu/~matt/courses/biomed/reparam.htm), *a problem that exists with splines is that when given a linearly increasing t, the point does not progress through the curve at even intervals. To correct this problem we reparameterized the spline by sampling points and then linearly interpolating between those sample points.*
 
