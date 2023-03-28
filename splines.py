@@ -8,7 +8,7 @@ class Spline(object):
     def get_name(self):
         return self.__class__.__name__
 
-    def get_spline(self, control_points, u, reparameterize=True):
+    def get_spline(self, control_points, u, reparameterize=True, f=10):
         nb_segments = (
             int((control_points.shape[0] - 1) // 3)
             if self.type == "shifting"
@@ -18,8 +18,8 @@ class Spline(object):
         if np.isscalar(u):
             u = np.array([u])
 
-        if reparameterize:
-            u = self.reparameterize_mixing_parameter(control_points, u)
+        if reparameterize and f > 0:
+            u = self.reparameterize_mixing_parameter(control_points, u, int(f))
 
         # segmentID is the integer part => will decide which segment (i.e. set of 4 control points) to use
         # t is the decimal part  => will serve to mix the 4 control points of the segment (t in [0,1])
@@ -73,8 +73,7 @@ class Spline(object):
         elif self.type == "sliding":
             return control_points[id : id + 4]
 
-    def reparameterize_mixing_parameter(self, control_points, u):
-        f = 100  # the more points the better
+    def reparameterize_mixing_parameter(self, control_points, u, f):
         u_resampled = np.linspace(0, 1, f * len(u))
         spline_points, _ = self.get_spline(
             control_points, u_resampled, reparameterize=False
