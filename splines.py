@@ -1,14 +1,27 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Spline(object):
     def __init__(self, characteristic_matrix):
         self.characteristic_matrix = characteristic_matrix
+        self.spline_points = None
+        self.spline_tangents = None
+        self.spline_curvature = None
 
     def get_name(self):
         return self.__class__.__name__
 
-    def get_spline(self, control_points, u, reparameterize=True, f=10):
+    def get_spline_points(self):
+        return self.spline_points
+
+    def get_spline_tangents(self):
+        return self.spline_tangents
+
+    def get_spline_curvature(self):
+        return self.spline_curvature
+
+    def compute_spline(self, control_points, u, reparameterize=True, f=10):
         nb_segments = (
             int((control_points.shape[0] - 1) // 3)
             if self.type == "shifting"
@@ -30,7 +43,7 @@ class Spline(object):
 
         t_vector = np.vstack(
             (
-                np.power(t, 0),
+                np.ones(t.shape[0]),
                 np.power(t, 1),
                 np.power(t, 2),
                 np.power(t, 3),
@@ -40,14 +53,24 @@ class Spline(object):
         t_vector_diff = np.vstack(
             (
                 np.zeros(t.shape[0]),
-                np.power(t, 0),
+                np.ones(t.shape[0]),
                 2 * np.power(t, 1),
                 3 * np.power(t, 2),
             )
         ).T
 
-        spline_points = np.zeros(shape=(0, control_points.shape[1]))
-        spline_tangents = np.zeros(shape=(0, control_points.shape[1]))
+        t_vector_diff2 = np.vstack(
+            (
+                np.zeros(t.shape[0]),
+                np.zeros(t.shape[0]),
+                2 * np.ones(t.shape[0]),
+                6 * np.power(t, 1),
+            )
+        ).T
+
+        spline_points = np.array([]).reshape(0, control_points.shape[1])
+        spline_tangents = np.array([]).reshape(0, control_points.shape[1])
+        spline_curvature = np.array([])
 
         uniqueIDs, uniqueIndices, counts = np.unique(
             segmentIDs, return_index=True, return_counts=True
@@ -59,13 +82,26 @@ class Spline(object):
                 @ self.get_set_of_control_points(control_points, unique)
             )
             spline_points = np.vstack((spline_points, points))
+
             points = (
                 t_vector_diff[index : index + count, :]
                 @ self.characteristic_matrix
                 @ self.get_set_of_control_points(control_points, unique)
             )
             spline_tangents = np.vstack((spline_tangents, points))
-        return spline_points, spline_tangents
+
+            points = (
+                t_vector_diff2[index : index + count, :]
+                @ self.characteristic_matrix
+                @ self.get_set_of_control_points(control_points, unique)
+            )
+            spline_curvature = np.hstack(
+                (spline_curvature, np.linalg.norm(points, axis=1))
+            )
+
+        self.spline_points = spline_points
+        self.spline_tangents = spline_tangents
+        self.spline_curvature = spline_curvature
 
     def get_set_of_control_points(self, control_points, id):
         if self.type == "shifting":
@@ -75,11 +111,9 @@ class Spline(object):
 
     def reparameterize_mixing_parameter(self, control_points, u, f):
         u_resampled = np.linspace(0, 1, f * len(u))
-        spline_points, _ = self.get_spline(
-            control_points, u_resampled, reparameterize=False
-        )
+        self.compute_spline(control_points, u_resampled, reparameterize=False)
 
-        norms = np.linalg.norm(np.diff(spline_points, axis=0), axis=1)
+        norms = np.linalg.norm(np.diff(self.spline_points, axis=0), axis=1)
         cumsum = np.concatenate(([0], np.cumsum(norms)))
         cumsum /= cumsum[-1]
 
