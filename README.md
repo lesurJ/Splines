@@ -65,9 +65,11 @@ python3 -m pip install numpy matplotlib
         u = 0.25
         u = np.linspace(0,1,100)
 
-        # 4. Get the spline value as well as the tangents
+        # 4. Get the spline points, tangents and curvature
         spline.compute_spline(control_points, u)
         spline_points = spline.get_spline_points()
+        spline_tangents = spline.get_spline_tangents()
+        spline_curvature = spline.get_spline_curvature()
     ```
 
 
