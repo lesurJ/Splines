@@ -76,24 +76,26 @@ class Spline(object):
             segmentIDs, return_index=True, return_counts=True
         )
         for unique, index, count in zip(uniqueIDs, uniqueIndices, counts):
+            control_points_subset = self.get_set_of_control_points(control_points, unique)
+
             points = (
                 t_vector[index : index + count, :]
                 @ self.characteristic_matrix
-                @ self.get_set_of_control_points(control_points, unique)
+                @ control_points_subset
             )
             spline_points = np.vstack((spline_points, points))
 
             points = (
                 t_vector_diff[index : index + count, :]
                 @ self.characteristic_matrix
-                @ self.get_set_of_control_points(control_points, unique)
+                @ control_points_subset
             )
             spline_tangents = np.vstack((spline_tangents, points))
 
             points = (
                 t_vector_diff2[index : index + count, :]
                 @ self.characteristic_matrix
-                @ self.get_set_of_control_points(control_points, unique)
+                @ control_points_subset
             )
             spline_curvature = np.hstack(
                 (spline_curvature, np.linalg.norm(points, axis=1))
