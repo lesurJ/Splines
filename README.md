@@ -8,6 +8,10 @@ A simple repository to construct some famous splines such as Catmull-Rom, B-spli
 
 I started playing with splines while developping robotics application as I often encountered trajectories that needed to be smoothed out or interpolated.
 
+A spline is a continuous piece-wise function defined with polynomials that acts as a curve generator. The polynomials of the spline are defined by some coefficients that change the overall behavior of the curve. These coefficients are responsible for mixing the so-called $\textit{control points}$.
+
+## Implementation
+
 This implementation is quite minimalist and uses the following matrix form for all type of splines.
 
 $$
@@ -21,10 +25,11 @@ $$
 
 where
 - $t$ is the mixing parameter $\in [0,1]$
-- $\mathbf{A} \in \mathbb{R}^{4 \times 4}$ is the weight matrix, also called the characteristic matrix.
+- $\mathbf{A} \in \mathbb{R}^{4 \times 4}$ is the characteristic matrix.
 - $\mathbf{P} \in \mathbb{R}^{4 \times n}$ is the control points matrix, with each row containing a control point of dimension n.
 - $\mathbf{P(t)} \in \mathbb{R}^{1 \times n}$ is the resulting point.
 
+This implementation works for any dimension $n > 1$.
 
 ## Getting Started
 
@@ -73,11 +78,11 @@ python3 -m pip install numpy matplotlib
     ```
 
 
-### Remarks
+## Remarks
 
 The control points (CP) used in the main script are generated without any constraints on tangency and derivative continuity. The user should handle the constraints in the generation of the CP.
 
-**Bézier** : The Bézier spline is a concatenation of cubic Bézier curves containing each 4 CP. In order to be smooth, some conditions needs to be met at the junctions (e.g the CP before and after the junction are symmetric). This implementation assumes there are no duplicates in the CP; meaning the first cubic bézier has CP #0 to #3 included, the next one as CP #3 to #6 included etc.
+**Bézier** : The Bézier spline is a concatenation of cubic Bézier curves containing each 4 CP. In order to be smooth, some conditions needs to be met at the junctions (e.g the CP before and after the junction are symmetric). This implementation assumes there are no duplicates in the CP; meaning the first cubic bézier mixes $CP_i, i=0 \rightarrow 3$, the second cubic bézier mixes $CP_i, i=3 \rightarrow 6$ etc.
 
 **Catmull-Rom** : The Catmull-Rom is a special case of the cardinal spline with the scaling value set at $0.5$.
 
@@ -91,6 +96,18 @@ This behavior can be seen in the plot below.
 A comparison between a spline with an uniform input parameter and a reparameterized one is shown below.
 
 ![image3](images/reparameterization.png)
+
+**Basis functions**
+The basis functions for the splines can be found below. They can also be called with the method:
+```python
+spline.plot_basis_functions()
+```
+| Spline      | Basis Functions                    |
+| ----------- | ---------------------------------- |
+| Bezier      | ![Image](images/BF_bezier.png)     |
+| Catmull-Rom | ![Image](images/BF_catmullrom.png) |
+| B           | ![Image](images/BF_B.png)          |
+| Cardinal    | ![Image](images/BF_cardinal.png)   |
 
 ## License
 

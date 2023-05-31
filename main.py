@@ -23,23 +23,6 @@ def plot(control_points, splines, with_tangents=False):
 
         id1, id2 = np.divmod(ids, 2)
         id1 *= 2
-        if spline_points.shape[0] == 1:
-            ax[id1][id2].scatter(
-                spline_points[0, 0],
-                spline_points[0, 1],
-                c="r",
-                marker="x",
-                label="spline",
-            )
-        else:
-            ax[id1][id2].plot(
-                spline_points[:, 0],
-                spline_points[:, 1],
-                c="r",
-                marker="x",
-                label="spline",
-            )
-
         ax[id1][id2].plot(
             control_points[:, 0],
             control_points[:, 1],
@@ -48,6 +31,21 @@ def plot(control_points, splines, with_tangents=False):
             linestyle="dashed",
             label="control points",
         )
+
+        if spline_points.shape[0] == 1:
+            ax[id1][id2].scatter(
+                spline_points[0, 0],
+                spline_points[0, 1],
+                c="r",
+                label="spline",
+            )
+        else:
+            ax[id1][id2].plot(
+                spline_points[:, 0],
+                spline_points[:, 1],
+                c="r",
+                label="spline",
+            )
 
         if with_tangents:
             alpha = 0.5
@@ -80,10 +78,9 @@ def plot(control_points, splines, with_tangents=False):
 if __name__ == "__main__":
     control_points = generate_points()
 
-    splines = [Bezier(), CatmullRom(), B(), Cardinal()]
-    names = []
+    splines = [Bezier(), CatmullRom(), B(), Cardinal(s=0.25)]
+    u = np.linspace(0, 1, 100)
 
-    u = np.linspace(0, 1, 101)
     for s in splines:
         s.compute_spline(control_points, u)
 

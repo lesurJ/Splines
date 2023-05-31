@@ -21,6 +21,31 @@ class Spline(object):
     def get_spline_curvature(self):
         return self.spline_curvature
 
+    def _get_t_vector(self, t):
+        return np.vstack(
+            (np.ones(t.shape[0]), np.power(t, 1), np.power(t, 2), np.power(t, 3))
+        ).T
+
+    def _get_t_vector_diff(self, t):
+        return np.vstack(
+            (
+                np.zeros(t.shape[0]),
+                np.ones(t.shape[0]),
+                2 * np.power(t, 1),
+                3 * np.power(t, 2),
+            )
+        ).T
+
+    def _get_t_vector_diff2(self, t):
+        return np.vstack(
+            (
+                np.zeros(t.shape[0]),
+                np.zeros(t.shape[0]),
+                2 * np.ones(t.shape[0]),
+                6 * np.power(t, 1),
+            )
+        ).T
+
     def compute_spline(self, control_points, u, reparameterize=True, f=10):
         nb_segments = (
             int((control_points.shape[0] - 1) // 3)
@@ -32,7 +57,7 @@ class Spline(object):
             u = np.array([u])
 
         if reparameterize and f > 0:
-            u = self.reparameterize_mixing_parameter(control_points, u, int(f))
+            u = self._reparameterize_mixing_parameter(control_points, u, int(f))
 
         # segmentID is the integer part => will decide which segment (i.e. set of 4 control points) to use
         # t is the decimal part  => will serve to mix the 4 control points of the segment (t in [0,1])
@@ -41,32 +66,9 @@ class Spline(object):
         t[np.where(segmentIDs == nb_segments)] = 1
         segmentIDs[np.where(segmentIDs == nb_segments)] = nb_segments - 1
 
-        t_vector = np.vstack(
-            (
-                np.ones(t.shape[0]),
-                np.power(t, 1),
-                np.power(t, 2),
-                np.power(t, 3),
-            )
-        ).T
-
-        t_vector_diff = np.vstack(
-            (
-                np.zeros(t.shape[0]),
-                np.ones(t.shape[0]),
-                2 * np.power(t, 1),
-                3 * np.power(t, 2),
-            )
-        ).T
-
-        t_vector_diff2 = np.vstack(
-            (
-                np.zeros(t.shape[0]),
-                np.zeros(t.shape[0]),
-                2 * np.ones(t.shape[0]),
-                6 * np.power(t, 1),
-            )
-        ).T
+        t_vector = self._get_t_vector(t)
+        t_vector_diff = self._get_t_vector_diff(t)
+        t_vector_diff2 = self._get_t_vector_diff2(t)
 
         spline_points = np.array([]).reshape(0, control_points.shape[1])
         spline_tangents = np.array([]).reshape(0, control_points.shape[1])
@@ -76,7 +78,9 @@ class Spline(object):
             segmentIDs, return_index=True, return_counts=True
         )
         for unique, index, count in zip(uniqueIDs, uniqueIndices, counts):
-            control_points_subset = self.get_set_of_control_points(control_points, unique)
+            control_points_subset = self._get_control_points_subset(
+                control_points, unique
+            )
 
             points = (
                 t_vector[index : index + count, :]
@@ -105,13 +109,13 @@ class Spline(object):
         self.spline_tangents = spline_tangents
         self.spline_curvature = spline_curvature
 
-    def get_set_of_control_points(self, control_points, id):
+    def _get_control_points_subset(self, control_points, id):
         if self.type == "shifting":
             return control_points[3 * id : 3 * id + 4]
         elif self.type == "sliding":
             return control_points[id : id + 4]
 
-    def reparameterize_mixing_parameter(self, control_points, u, f):
+    def _reparameterize_mixing_parameter(self, control_points, u, f):
         u_resampled = np.linspace(0, 1, f * len(u))
         self.compute_spline(control_points, u_resampled, reparameterize=False)
 
@@ -120,6 +124,24 @@ class Spline(object):
         cumsum /= cumsum[-1]
 
         return np.interp(u, cumsum, u_resampled)
+
+    def plot_basis_functions(self):
+        t = np.linspace(0, 1, 50)
+        t_vector = self._get_t_vector(t)
+        basis_functions = t_vector @ self.characteristic_matrix
+
+        _, ax = plt.subplots()
+        for i in range(4):
+            ax.plot(t, basis_functions[:, i], label=rf"$w_{i+1}$")
+        ax.grid()
+        ax.legend()
+        ax.set_aspect("equal", "box")
+        ax.set_xlim([-0.1, 1.1])
+        ax.set_ylim([-0.1, 1.1])
+        ax.set_title(f"Basis functions for the {self.get_name()} spline.")
+        ax.set_xlabel(r"Mixing parameter $t$")
+        ax.set_ylabel(r"Weight $w$")
+        plt.show()
 
 
 class Bezier(Spline):
@@ -141,7 +163,7 @@ class B(Spline):
 
 
 class Cardinal(Spline):
-    def __init__(self, s=0.25):
+    def __init__(self, s):
         characteristic_matrix = np.array(
             [
                 [0, 1, 0, 0],
