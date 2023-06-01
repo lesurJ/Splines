@@ -18,7 +18,7 @@ def generate_points(random=False):
     return control_points
 
 
-def plot(control_points, splines, with_tangents=False):
+def overall_plot(control_points, splines, with_tangents=False):
     fig, ax = plt.subplots(4, 2, height_ratios=[4, 1, 4, 1], figsize=(7, 7))
     fig.suptitle(
         "Comparison between the implemented splines and their associated curvatures."
@@ -88,5 +88,7 @@ if __name__ == "__main__":
 
     for s in splines:
         s.compute_spline(control_points, u)
+        s.plot()
+        s.plot_basis_functions()
 
-    plot(control_points, splines)
+    overall_plot(control_points, splines)

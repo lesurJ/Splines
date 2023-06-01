@@ -8,6 +8,7 @@ class Spline(object):
         self.spline_points = None
         self.spline_tangents = None
         self.spline_curvature = None
+        self.control_points = None
 
     def get_name(self):
         return self.__class__.__name__
@@ -47,6 +48,8 @@ class Spline(object):
         ).T
 
     def compute_spline(self, control_points, u, reparameterize=True, f=10):
+        self.control_points = control_points
+
         nb_segments = (
             int((control_points.shape[0] - 1) // 3)
             if self.type == "shifting"
@@ -141,6 +144,32 @@ class Spline(object):
         ax.set_title(f"Basis functions for the {self.get_name()} spline.")
         ax.set_xlabel(r"Mixing parameter $t$")
         ax.set_ylabel(r"Weight $w$")
+        plt.show()
+
+    def plot(self):
+        dim = self.control_points.shape[1]
+        assert dim == 2, f"Cannot plot spline for control points with dimension {dim}!"
+        assert self.spline_points is not None
+
+        _, ax = plt.subplots()
+        ax.plot(
+            self.control_points[:, 0],
+            self.control_points[:, 1],
+            c="k",
+            marker=".",
+            linestyle="dashed",
+            label="control points",
+        )
+        ax.plot(
+            self.spline_points[:, 0],
+            self.spline_points[:, 1],
+            c="r",
+            label="spline",
+        )
+        ax.grid()
+        ax.legend()
+        ax.set_title(f"{self.get_name()} spline.")
+        ax.set_aspect("equal", "box")
         plt.show()
 
 
