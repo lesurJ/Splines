@@ -3,12 +3,19 @@ import numpy as np
 from splines import Bezier, CatmullRom, B, Cardinal
 
 
-def generate_points(n=13):
-    angles = np.sort(np.random.uniform(0, 2 * np.pi, n))
-    r = np.random.uniform(0.5, 1, n)
-    X = r * np.cos(angles)
-    Y = r * np.sin(angles)
-    return np.vstack((X, Y)).T
+def generate_points(random=False):
+    if random:
+        n = 13
+        angles = np.sort(np.random.uniform(0, 2 * np.pi, n))
+        r = np.random.uniform(0.5, 1, n)
+        X = r * np.cos(angles)
+        Y = r * np.sin(angles)
+        control_points = np.vstack((X, Y)).T
+    else:
+        control_points = np.array(
+            [[0, 0], [0, 1], [1, 0], [2, 0], [2, 1], [1.2, 0.4], [1, 1]]
+        )
+    return control_points
 
 
 def plot(control_points, splines, with_tangents=False):
@@ -64,8 +71,6 @@ def plot(control_points, splines, with_tangents=False):
         ax[id1][id2].set_title(s.get_name())
         ax[id1][id2].grid()
         ax[id1][id2].legend()
-        ax[id1][id2].set_xlim(-1.1, 1.1)
-        ax[id1][id2].set_ylim(-1.1, 1.1)
         ax[id1][id2].set_aspect("equal", "box")
 
         spline_curvature = s.get_spline_curvature()

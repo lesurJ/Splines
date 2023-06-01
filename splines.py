@@ -164,6 +164,7 @@ class B(Spline):
 
 class Cardinal(Spline):
     def __init__(self, s):
+        self.s = s
         characteristic_matrix = np.array(
             [
                 [0, 1, 0, 0],
@@ -174,6 +175,9 @@ class Cardinal(Spline):
         )
         super().__init__(characteristic_matrix)
         self.type = "sliding"
+
+    def get_name(self):
+        return super().get_name() + f" (s={self.s})"
 
 
 class CatmullRom(Cardinal):
